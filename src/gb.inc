@@ -127,20 +127,6 @@ HV_WAIT: MACRO
   jr nz,@-4
 ENDM
 
-ld_long: MACRO
-  IF STRLWR("\1") == "a"
-    ; ld a, [$ff40]
-    db $FA
-    dw \2
-  ELSE
-    IF STRLWR("\2") == "a"
-      ; ld [$ff40], a
-      db $EA
-      dw \1
-    ENDC
-  ENDC
-ENDM
-
 ;#DEFINE  RGBSet(R,G,B) DW (((B>>3)<<10)+((G>>3)<<5)+(R>>3)]
 
 ;EX AF,BC C1F1C5F5 4 NOP 1
@@ -1660,34 +1646,34 @@ akeyp0: call    getbuts
 ;   $10 - A       $1 - Right
 
 getbuts:
-    ld    a,$20
-    ld_long rP1, a    ;turn on P15
-
-    ld_long a,rP1    ;delay
-    ld_long a,rP1
-    cpl
-    and    $f
-    swap    a
-    ld    b,a
-    ld    a,$30
-    ld_long    rP1,a
-    ld    a,$10
-    ld_long    rP1,a    ;turn on P14
-    ld_long    a,rP1    ;delay
-    ld_long    a,rP1
-    ld_long    a,rP1
-    ld_long    a,rP1
-    ld_long    a,rP1
-    ld_long    a,rP1
-    cpl
-    and    $f
-    or    b
-    swap    a
-    ld  b,a
-    ld  a,$30
-    ld_long  rP1,a
-    ld  a,b
-    ret
+        ld      a,$20
+        ldh     [rP1], a    ;turn on P15
+  
+        ldh     a,[rP1]    ;delay
+        ldh     a,[rP1]
+        cpl 
+        and     $f
+        swap    a
+        ld      b,a
+        ld      a,$30
+        ldh     [rP1],a
+        ld      a,$10
+        ldh     [rP1],a    ;turn on P14
+        ldh     a,[rP1]    ;delay
+        ldh     a,[rP1]
+        ldh     a,[rP1]
+        ldh     a,[rP1]
+        ldh     a,[rP1]
+        ldh     a,[rP1]
+        cpl 
+        and     $f
+        or      b
+        swap    a
+        ld      b,a
+        ld      a,$30
+        ldh     [rP1],a
+        ld      a,b
+        ret
 
 ;Delay required for external
 ;keyboard circuits.

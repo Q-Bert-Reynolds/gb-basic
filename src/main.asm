@@ -167,19 +167,19 @@ start::
         call    new             ;new program
 
         ld      a,$77           ;turn sound volume up
-        ld_long rAUDVOL,a
+        ldh     [rAUDVOL],a
 
         xor     a               ;set sound outputs to off
-        ld_long rAUDTERM,a
+        ldh     [rAUDTERM],a
 
         ld      a,$82           ;turn sound 2 generator on
-        ld_long rAUDENA,a
+        ldh     [rAUDENA],a
 
         ld      a,$84           ;set sound duty
-        ld_long rAUD2LEN,a
+        ldh     [rAUD2LEN],a
 
         ld      a,$f0          ;set envelope
-        ld_long rAUD2ENV,a
+        ldh     [rAUD2ENV],a
 
         ld      a,2*fpnib
         ld      [infes],a
@@ -3113,7 +3113,7 @@ sound::
 ;        ld      [rAUDVOL],a
 
         ld      a,$ff
-        ld_long rAUDTERM,a
+        ldh     [rAUDTERM],a
 
 ;        ld      a,82h
 ;        ld      [rAUDENA],a
@@ -3125,11 +3125,11 @@ sound::
 ;        ld      [0ff17h],a
 
         ld      a,l             ;set frequency
-        ld_long rAUD2LOW,a
+        ldh     [rAUD2LOW],a
         ld      a,h
         and     7
         or      $80
-        ld_long rAUD2HIGH,a
+        ldh     [rAUD2HIGH],a
 
         ld      a,d
         cp      $ff             ;is duration 65535?
@@ -3138,7 +3138,7 @@ sound::
         call    dely1           ;delay for duration
 sound1::
         xor     a               ;turn all sound off
-        ld_long rAUDTERM,a
+        ldh     [rAUDTERM],a
 sound2::
         ret
 

@@ -29,6 +29,24 @@ If you are interested in robotics or electronics projects, then it could be very
 
 6. There is software support for a [rewired Mac 512 Keyboard](http://www.devrs.com/gb/files/gbmac512.gif) that's made from an [unmodified Mac 512 keyboard](http://www.devrs.com/gb/files/mac512.gif).
 
+## RAM Assignments
+
+    C000
+      RAM used internally by GB Basic
+    BOFA
+      Beginning of basic file.
+    EOFA
+      Points to last byte of basic program.
+    MATA
+      Points to free memory after program
+      for next DIM statement. Is modified
+      by every DIM statement.
+    STB
+      Points to first byte of downward
+      growing variable storage. Is modified
+      by every new variable used.
+    MEMTOP
+      Last available byte of RAM.
 
 ## License
 
