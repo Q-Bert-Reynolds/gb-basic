@@ -21,7 +21,7 @@
 ;         Reported by Marc Rawer.
 ; V2.00 - Added initial support for GameBoy Colo(u)r.
 ;       - Added SLOW & FAST to switch GBC CPU speeds.
-;         [Defaults to SLOW on power up.]
+;         (Defaults to SLOW on power up.)
 ; V2.10 - Added serial output support for MBC pins.
 
 INCLUDE "src/hardware.inc"
@@ -250,8 +250,8 @@ SECTION "Header", ROM0[$100]
         jp      begin
 
 ;Nintendo scrolling logo
-;(Code won't work on a real GameBoy]
-;(if next three lines are altered.]
+;(Code won't work on a real GameBoy)
+;(if next three lines are altered.)
 
 DB $CE,$ED,$66,$66,$CC,$0D,$00,$0B,$03,$73,$00,$83,$00,$0C,$00,$0D
 DB $00,$08,$11,$1F,$88,$89,$00,$0E,$DC,$CC,$6E,$E6,$DD,$DD,$D9,$99
@@ -259,7 +259,7 @@ DB $BB,$BB,$67,$63,$6E,$0E,$EC,$CC,$DD,$DC,$99,$9F,$BB,$B9,$33,$3E
 
 ;Rom Header Info
 pup:
-;      12345678901xxxxx
+;   12345678901xxxxx
 DB "GBBasic2.10"             ; Cart name   11bytes
 DB "JEFF"
 DB $80                       ; Set GBC mode
@@ -269,8 +269,8 @@ DB 0                         ; ROM Size    32k
 DB 2                         ; RAM Size     8k
 DB $ff,$7e                   ; Maker ID    $7eff=Jeff Frohwein
 DB 0                         ; Version     =0
-DB $e2                       ; Complement check (important]
-DW $c40e                     ; Checksum (not important]
+DB $e2                       ; Complement check (important)
+DW $c40e                     ; Checksum (not important)
 
 SECTION "Entry Point", ROM0[$0150]
 ;Pointer to important address pointers
@@ -440,14 +440,14 @@ BaudRateTable:
 ;    Sinit BAUDRATE,DATA
 ;
 ; BAUDRATE
-;  0 = 1200 (Only available in SPEED 0 mode]
+;  0 = 1200 (Only available in SPEED 0 mode)
 ;  1 = 2400
 ;  2 = 4800
 ;  3 = 9600
 ;  4 = 14400
 ;  5 = 19200
 ;  6 = 38400
-;  7 = 57600 (Only available in SPEED 1 mode]
+;  7 = 57600 (Only available in SPEED 1 mode)
 ; DATA
 ;  bit 0 - 0 = Serial idle is low, 1 = Serial idle is high
 
@@ -1305,7 +1305,7 @@ jnc22:  ld  a,d
 
 ; Clear screen
 
-clsgr:  ld      hl,_VRAM
+clsgr:  ld      hl,_VRAM8000
         ld      d,0
         ld      e,16            ; x2=4096
 clsgr2: xor     a               ; A = 0
@@ -1376,7 +1376,7 @@ clstxt:
 
         call    initkpd
 
-        ld      bc,11
+        ld      bc,$0101
         call    locate
 
         jp      highlight
@@ -2421,7 +2421,7 @@ scroll1:
 scroll2:
  di
  HV_WAIT
- ldi    a,[hl]
+ ld     a,[hli]
  ld     [bc],a
  ei
 

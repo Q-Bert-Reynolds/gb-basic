@@ -120,6 +120,7 @@ eofa:: DW                   ;end of file addr
 mata:: DW                   ;free memory for upward growing matrixs
 stb:: DW                    ;first byte of downward growing variables
 memtop:: DW                 ;last assigned memory location
+_breakpoint::
 memfree:: DB
 
 ;Basic Statements Storage Format
@@ -1787,49 +1788,49 @@ resto4:: inc     hl           ;advance text pointer past line # & count
         ret
 
 ; "print"
-print::  call    gc
+print:: call    gc
         cp    cr         ;check for stand alone print
         jp    z,crlf
 
 prin9::  cp    "\""
         jr      z,pstr       ;print the string
 
-        cp    tabrw
-        jr      z,ptab       ;tabulation
+        cp      tabrw
+        jr        z,ptab       ;tabulation
 
-        cp    "%"
-        jp    z,pform         ;set format
+        cp      "%"
+        jp      z,pform         ;set format
 
-        cp    cr
-        ret    z
-        cp    ":"
-        ret    z
+        cp      cr
+        ret      z
+        cp      ":"
+        ret      z
 
         call    exprb         ;must be expression to print
 
-        ld    de,fpsink
+        ld      de,fpsink
         call    popa1         ;pop value to fpsink
 
 ;        ld      a,[phead]
 ;        cp      56
 ;        call    nc,crlf      ;do crlf if print head is past 56
 
-        ld    hl,fpsink
+        ld      hl,fpsink
         call    fpout
 
-        ld    b," "
+        ld      b," "
         call    chout
-pr1::    call    gc         ;get delimiter
-        cp      $3b          ; ';'
-        jp    nz,crlf
+pr1::   call    gc         ;get delimiter
+        cp      ";"        
+        jp      nz,crlf
 
-pr0::    call    gci
+pr0::   call    gci
         call    gc
         jr      prin9
 
-pstr::   call    gci         ;gobble the quote
+pstr::  call    gci         ;gobble the quote
         call    prnt         ;print up to double quote
-        inc    hl         ;move pointer past double quote
+        inc     hl         ;move pointer past double quote
 
         ld      a,l
         ld      [txa],a
@@ -1838,38 +1839,38 @@ pstr::   call    gci         ;gobble the quote
 
         jr      pr1
 
-pform::  ld    a,2*fpnib
-        ld    [infes],a
+pform:: ld      a,2*fpnib
+        ld      [infes],a
         call    gci         ;gobble previous char
-pfrm1::  call    gci
-        ld    hl,infes
-        cp    "%"         ;delimiter
+pfrm1:: call    gci
+        ld      hl,infes
+        cp      "%"         ;delimiter
         jr      z,pr1
 
         ld      b,$80
-        cp    "z"         ;trailing zeros?
+        cp      "z"         ;trailing zeros?
         jr      z,pf1
 
-        ld    b,1
-        cp    "e"         ;scientific notation?
+        ld      b,1
+        cp      "e"         ;scientific notation?
         jr      z,pf1
 
         call    nmchk
-        jp    nc,e1
+        jp      nc,e1
 
-        sub    "0"         ;number of decimal places
+        sub     "0"         ;number of decimal places
         rlca
-        ld    b,a
-        ld    a,[hl]
+        ld      b,a
+        ld      a,[hl]
         and     $c1
-        ld    [hl],a
-pf1::    ld    a,[hl]
-        or    b
-        ld    [hl],a
+        ld      [hl],a
+pf1::   ld      a,[hl]
+        or      b
+        ld      [hl],a
         jr      pfrm1
 
-ptab::   call    gci         ;gobble tab rw
-        ld    b,lparrw
+ptab::  call    gci         ;gobble tab rw
+        ld      b,lparrw
         call    eatc
         call    exprb
         ld    b,")"
@@ -3974,13 +3975,13 @@ radd::   add     hl,de
 prntcr:: ld      c,cr
         jr      prn1
 ;
-prnt::   ld      c,term
+prnt::  ld      c,term
 ;
 ; print message addressed by hl
 ; char in c specifies terminator.
 ; exit::    hl points to term addr
 ;
-prn1::   ld      a,[hl]         ;get next char
+prn1::  ld      a,[hl]         ;get next char
         ld      b,a         ;for chout
         cp      c         ;end of message test
         ret     z
@@ -4374,7 +4375,7 @@ chout::
         jr      c,chchk         ;yes, don't display control chars
 
         call    outch
-chchk::  cp      cr
+chchk:: cp      cr
         jr      nz,chlf      ;not cr, is it lf?
         xor    a
         jp    pstor         ;return phead to zero
@@ -5449,19 +5450,19 @@ fmul1::    sub    128         ;remove excess bias
         dec    hl
         xor    a
         ld    b,digit+2
-fmul2::    ld    [hl],a         ;zero working buffer
+fmul2:: ld    [hl],a         ;zero working buffer
         dec    hl
         dec    b
         jr      nz,fmul2
 
-  ld    a,[exp]
-  or    a
-  jp    z,zerex
+        ld    a,[exp]
+        or    a
+        jp    z,zerex
 
-  ld    c,digit
-  ld    hl,hold1+digit
+        ld    c,digit
+        ld    hl,hold1+digit
 ; get multiplier into holding register
-fmul3::    ld    a,[de]
+fmul3:: ld    a,[de]
         ld    [hl],a         ;put in register
         dec    hl
         dec    de
@@ -5471,7 +5472,7 @@ fmul3::    ld    a,[de]
         ld    [hl],c
         dec    hl
         ld    b,250         ;set loop count
-fmul4::    ld    de,digit+1
+fmul4:: ld    de,digit+1
         ld    c,e
         add    hl,de
 
@@ -5486,7 +5487,7 @@ fmul4::    ld    de,digit+1
         cp      128
         jr      c,fmul8      ;finished
 
-fmul5::    ld    a,[de]         ;get digits
+fmul5:: ld    a,[de]         ;get digits
         adc     a,a          ;times 2
         daa
         ld    [hl],a         ;put in holding register
