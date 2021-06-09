@@ -1,7 +1,8 @@
 
 ;GameBoy Specific Routines -
-; Lasted edit 7-Mar-99
-;
+;   March 7, 1999 - last edit from Jeff Frohwein
+;    June 8, 2021 - first edit from Nolan Baker
+
 ;  The reason these routines are in a separate file
 ; is because they are specific to GameBoy. For development
 ; purposes, I used a CPM.INC file to test this basic
@@ -23,8 +24,11 @@
 ;       - Added SLOW & FAST to switch GBC CPU speeds.
 ;         (Defaults to SLOW on power up.)
 ; V2.10 - Added serial output support for MBC pins.
+; V2.20 - Added PS/2 and USB keyboard support.
+;       - Drops support for Mac 512 Keyboard
 
 INCLUDE "src/hardware.inc"
+INCLUDE "src/keyboard/keyboard.asm"
 
 BRKBTN  EQU $c0      ;front panel break button(s]
 BSBTN   EQU $80      ;backspace button
@@ -150,11 +154,14 @@ SECTION "Timer", ROM0[$50]             ; Timer Overflow Interrupt
 
 SECTION "Serial", ROM0[$58]             ; Serial Transfer Completion
         push    af
+        ld      a, [kb_type]
+        and     a
+        jp      nz,PS2KeyboardInterrupt
 
         xor     a
         ld      [linkDC],a      ; Reset link down count
 
-        ldh     a,[1]
+        ldh     a,[rSB]
         cp      TXIDLE          ; Was an idle received?
         jr      z,stc1          ; yes, don't save it
 
@@ -163,13 +170,14 @@ SECTION "Serial", ROM0[$58]             ; Serial Transfer Completion
 stc1:   call    LinkUpDetect
 
         ld      a,[txchar]      ; Start transfer again - Send txchar
-        ldh     [1],a
+        ldh     [rSB],a
         ld      a, SCF_TRANSFER_START | SCF_CLOCK_EXTERNAL
-        ldh     [2],a
+        ldh     [rSC],a
 
         ld      a,TXIDLE        ; Clear txchar
         ld      [txchar],a
 
+KBReturn::
         pop     af
         reti
 
@@ -698,19 +706,19 @@ SerialLoop9:
 ;    interpreter driver
 ;
 
-iloop:    call    istat         ;interpret current statement
-          call    joe         ;test for junk on end
-        jr    c,iloopx     ;stop if end of program
-        call  getbuts      ;break button pressed?
-        and   BRKBTN
-        cp    BRKBTN
-        jr    nz,iloop     ;no
-iloopb:
-        call  text_mode
-        jp    stop1         ;execute end statement
-iloopx:
-        call  text_mode
-        jp    bend
+iloop:  call    istat        ;interpret current statement
+        call    joe          ;test for junk on end
+        jr      c,iloopx     ;stop if end of program
+        call    getbuts      ;break button pressed?
+        and     BRKBTN
+        cp      BRKBTN
+        jr      nz,iloop     ;no
+iloopb:  
+        call    text_mode
+        jp      stop1        ;execute end statement
+iloopx:  
+        call    text_mode
+        jp      bend
 
 ;Update servo table to reflect the current
 ;values of the servo settings
@@ -849,9 +857,15 @@ setLink:
         call    pfix
         ld      a,e
         ld      [linkAdr],a
+        push    af 
 
         xor     a;CART_SRAM_DISABLE
         ld      [rRAMG],a
+        ld      [kb_type],a;assume no keyboard
+
+        pop     af
+        cp      a,2;check for keyboard
+        call    z,DetectKeyboard
         ret
 
 ; Get game link port setting
@@ -866,6 +880,10 @@ getLink:
         ld      [rRAMG],a
         pop     af
 
+        push    af
+        cp      a,2;check for keyboard
+        call    z,DetectKeyboard
+        pop     af
         ret
 
 ;
@@ -1695,7 +1713,7 @@ extkey:
         jp      z,getch0        ;yes, don't do anything
 
         cp      2               ;Is link port set for external keyboard?
-        jr      z,extky0        ;yes
+        jp      z,ProcessKeyCodes;extky0        ;yes
 
         ld      a,[linkUp]
         or      a               ;Is serial link up?
@@ -1711,8 +1729,9 @@ extkey:
         pop     af
         ret
 
-;Check external keyboard for a key
-
+;Below is the old external (Mac 512) keyboard routine.
+;It's not used anymore. 
+;I should probably delete it.
 extky0:
         call    keychk          ;key pressed?
         jr      nz,extky1       ;yes

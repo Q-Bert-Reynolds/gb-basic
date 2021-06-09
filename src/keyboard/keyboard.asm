@@ -6,11 +6,6 @@ KB_TYPE_NONE EQU 0
 KB_TYPE_PS2  EQU 1
 KB_TYPE_IGKB EQU 2
 
-;kb_mode
-KB_MODE_NONE    EQU 0
-KB_MODE_BUTTONS EQU 1
-KB_MODE_TYPING  EQU 2
-
 ;kb_error
 PS2_ERROR_TIMEOUT      EQU %100000
 PS2_ERROR_UNKNOWN_CODE EQU %010000
@@ -54,17 +49,24 @@ kb_error_count:: DB
 kb_modifiers:: DB ;FSCAUPNL - (F)unction, (S)hift, (C)trl, (A)lt, S(U)per, Ca(P)s Lock, (N)um Lock, Scro(L)l Lock
 kb_flags:: DB;xxxxxxER - (E)xtended key flag, (R)elease key flag
 kb_type:: DB
-kb_mode:: DB
 
-SECTION "Keyboard Code Bank 0", ROM0
+SECTION "Keyboard Code", ROM0
 INCLUDE "src/keyboard/ps2_interrupt.asm"
-
-SECTION "Keyboard Code Bank X", ROMX
 INCLUDE "src/keyboard/kb_jump_table.asm"
 INCLUDE "src/keyboard/kb_handlers.asm"
 INCLUDE "src/keyboard/ps2_ascii_keymaps.asm"
 INCLUDE "src/keyboard/ps2_handlers.asm"
 INCLUDE "src/keyboard/igkb_handlers.asm"
+
+USBDelay:
+  xor a
+.loop
+    push af
+    call waitvbl
+    pop af
+    dec a
+    jr nz, .loop
+  ret
 
 DetectKeyboard::
   ld a, KB_TYPE_PS2
@@ -73,8 +75,7 @@ DetectKeyboard::
   ld [rSB], a
   ld a, SCF_TRANSFER_START | SCF_CLOCK_INTERNAL
   ld [rSC], a ;ask for byte using gb clock
-  ld de, 5
-  call gbdk_Delay
+  call USBDelay
   ld a, [kb_error]
   cp a, PS2_ERROR_TIMEOUT | PS2_ERROR_PARITY_BIT | PS2_ERROR_FINISH_BIT
   jr nz, .usePS2Clock;if magic error code not received, PS2 connected
@@ -87,9 +88,6 @@ DetectKeyboard::
   ret
 
 ProcessKeyCodes::
-  ld a, [kb_mode]
-  and a
-  ret z;exit early if KB_MODE_NONE
   ld a, [kb_type]
 .processPS2
   cp a, KB_TYPE_PS2
@@ -104,8 +102,7 @@ ProcessIGKeyCodes:
   ld [rSB], a
   ld a, SCF_TRANSFER_START | SCF_CLOCK_INTERNAL
   ld [rSC], a ;ask for byte using gb clock
-  ld de, 5
-  call gbdk_Delay
+  call USBDelay
   ld a, [rSB]
   and a
   ret z

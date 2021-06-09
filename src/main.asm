@@ -4,8 +4,8 @@
 ;*        Z80 or GameBoy        *
 ;********************************
 
-;last edit:: 9-Dec-97
-; by Jeff Frohwein
+;December 9, 1997 - last edit from Jeff Frohwein
+;    June 8, 2021 - first edit from Nolan Baker
 
 percision EQU   6            ;This is the floating percision in digits.
                               ;It should be an even number because the
@@ -29,15 +29,15 @@ ftype   EQU     1            ;control stack for entry type
 forsz   EQU     fpsiz*2+2+2+1;'for' control stack entry size
 gtype   EQU     2            ;control stack gosub entry type
 etype   EQU     0            ;control stack underflow type
-uminu   EQU    $31           ;unary minus
-term    EQU    $22           ; 'prnt' terminator character
+uminu   EQU     $31          ;unary minus
+term    EQU     $22          ; 'prnt' terminator character
 
-subit   EQU    2             ;speed up button bit for list
-sdbit   EQU    3             ;slow down button bit for list
+subit   EQU     2            ;speed up button bit for list
+sdbit   EQU     3            ;slow down button bit for list
 
-linent  EQU    $e           ;line number token
+linent  EQU     $e           ;line number token
 
-GBB_RDY EQU    1             ;Input ready command for ext terminal
+GBB_RDY EQU     1            ;Input ready command for ext terminal
 
 INCLUDE "src/gb.inc"
 
@@ -120,7 +120,6 @@ eofa:: DW                   ;end of file addr
 mata:: DW                   ;free memory for upward growing matrixs
 stb:: DW                    ;first byte of downward growing variables
 memtop:: DW                 ;last assigned memory location
-_breakpoint::
 memfree:: DB
 
 ;Basic Statements Storage Format

@@ -1,10 +1,13 @@
 ;4 CPU cycles at 4.194304 MHz is 0.953674316 μs
 ;PS/2 keyboard clock is ~100 μs between clock pulses
 
-PS2KeyboardInterrupt::
+PS2KeyboardInterrupt::;af already pushed on stack
   ld a, [kb_type]
   cp a, KB_TYPE_PS2
-  ret nz;if not in PS/2 mode, exit early
+  jp KBReturn;if not in PS/2 mode, exit early
+  push bc
+  push de
+  push hl
 
   ld a, [rSB]
   ld b, a;store first 8 bits of scan code (S0123456)
@@ -138,4 +141,8 @@ PS2KeyboardInterrupt::
   ld [rSB], a;clear serial bits
   ld a, SCF_TRANSFER_START | SCF_CLOCK_EXTERNAL
   ld [rSC], a;start next transfer using external clock
-  ret
+
+  pop hl
+  pop de
+  pop bc
+  jp KBReturn

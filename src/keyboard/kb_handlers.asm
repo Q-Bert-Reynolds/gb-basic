@@ -8,49 +8,26 @@
 ;KBHandleEscape
 
 KBHandleCharacter::;a = character in ASCII
-  ld b, a
-  ld a, [kb_mode]
-  cp a, KB_MODE_TYPING
-  ret nz
-
-  ld a, b;ASCII
-
-  ret
+  jp charoutns
 
 KBHandleArrowKey::;a = DPad key
   
   ret
 
 KBHandleTab::
-  ld b, a
-  ld a, [kb_mode]
-  cp a, KB_MODE_TYPING
-  ret nz
-
 
   ret
 
 KBHandleEnter::
-  ld a, [kb_mode]
-  cp a, KB_MODE_BUTTONS
-  ret nz
-  
-  ret
+  ld a, cr
+  jp charoutns
 
 KBHandleBackspace::
-  ld b, a
-  ld a, [kb_mode]
-  cp a, KB_MODE_TYPING
-  ret nz
-
-  ret
+  ld a, BS
+  jp charoutns
 
 KBHandleDelete::
-  ld b, a
-  ld a, [kb_mode]
-  cp a, KB_MODE_TYPING
-  ret nz
-
+  
   ret
 
 KBHandleFunctionKey::;a = function key
@@ -58,9 +35,5 @@ KBHandleFunctionKey::;a = function key
   ret
 
 KBHandleEscape::
-  ld b, a
-  ld a, [kb_mode]
-  cp a, KB_MODE_BUTTONS
-  ret nz
   
   ret
